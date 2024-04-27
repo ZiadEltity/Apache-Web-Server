@@ -1,148 +1,24 @@
-# Apache-Web-Server
+# Ansible playbook and Jenkins pipeline configuration
 
-## Project Description
-
-This project aims to set up a (CI/CD) pipeline using Jenkins, Ansible, and GitLab. It involves provisioning virtual machines (VMs) with dedicated services, managing user access, integrating GitLab with Jenkins, and detecting a code commit to make the Jenkins pipeline autonomously execute an ansible playbook to install and configure Apache HTTP Server and generate an email notification if the pipeline fails.
-
-## Prerequisites
-
-1. VMware workstation installed on your machine (using CentOS 9 stream image).
-2. VM1- Jenkins Server: A dedicated Jenkins server for orchestrating the CI/CD pipeline.
-3. VM2 - GitLab Instance: Implementation of a private GitLab instance for hosting Git.
-4. VM3- Web Server: Deployment of a web server with Apache HTTP Server service using Ansible. 
-
-## Setup
-
-1. **Provisioning VMs**: 
-
-    - VM1: Jenkins Server
-      - IP: 192.168.44.100:8080
-      - Admin User: jenkins
-    - VM2: GitLab Instance
-      - IP: 192.168.44.120
-      - Admin User: gitlab
-    - VM3: Web Server with Apache HTTP Server
-      - IP: 192.168.44.140
-      - Admin User: apache
-
-2. **Create users named "DevTeam" and "OpsTeam" on VM3**:
-- checkers.sh bash script:
-    #### Function takes a parameter with username, and return 0 if the requested user is the same as the current user
-        function checkUser {
-            RUSER=${1}
-            [ ${RUSER} == ${USER} ] && return 0
-            return 1 
-        }
-    #### Function tasks a parameter with username, and return 0 if the new user is not exist
-        function userExist {
-            NUSER=${1}
-            cat /etc/passwd | grep -w ${NUSER} > /dev/null 2>&1
-            [ ${?} -ne 0 ] && return 0
-            return 1
-        }
-    #### Function takes a parameter with groupname, and return 0 if the new group is not exist
-        function groupExist {
-            NGRP=${1}
-            cat /etc/group | grep -w ${NGRP} > /dev/null 2>&1
-            [ ${?} -ne 0 ] && return 0
-            return 1
-        }
-
-    #### Exit codes:
-        -	0: Success
-        -   1: Script is executed with a user has no privileges 
-        -   2: Users are existed 
-        -   3: Group is existed 
-
-- CreateUsers.sh bash script:
-    #### Check according to the previous exit codes:
-   ```bash
-    source ./checkers.sh
-    checkUser "root"
-    [ ${?} -ne 0 ] && echo "Scrip must execute with sudo privilege" && exit 1
-    userExist "DevTeam"
-    [ ${?} -ne 0 ] && echo "DevTeam user is already exist" && exit 2
-    userExist "OpsTeam"
-    [ ${?} -ne 0 ] && echo "OpsTeam user is already exist" && exit 2
-    groupExist "webAdmins"
-    [ ${?} -ne 0 ] && echo "webAdmins group is already exist" && exit 3
-    ```
-    #### Create users named "DevTeam" and "OpsTeam"
-   ```bash
-    useradd DevTeam
-    echo "DevTeam user created"
-    useradd OpsTeam
-    echo "OpsTeam user created"
-    ```
-    #### Create group named "webAdmins" for centralized access control
-   ```bash
-    groupadd webAdmins
-    echo "webAdmins group created."
-    ```
-    #### Assign these users to "webAdmins" group
-   ```bash
-    gpasswd -M DevTeam,OpsTeam webAdmins
-    echo "Users DevTeam and OpsTeam assigned to webAdmins group"
-
-    exit 0
-    ```
-3. **Fetch a list of users from the "webAdmins" group on VM3**:
-- checkers.sh bash script:
-    #### Function takes a parameter with username, and return 0 if the requested user is the same as the current user
-        function checkUser {
-            RUSER=${1}
-            [ ${RUSER} == ${USER} ] && return 0
-            return 1 
-        }
-    #### Function takes a parameter with groupname, and return 0 if the new group is exist
-        function groupExist {
-            NGRP=${1}
-            cat /etc/group | grep -w ${NGRP} > /dev/null 2>&1
-            [ ${?} -ne 0 ] && return 0
-            return 1
-        }
-
-    #### Exit codes:
-        -	0: Success
-        -   1: Script is executed with a user has no privileges 
-        -   2: Group is existed 
-
-- GroupMembers.sh bash script:
-    #### Check according to the previous exit codes:
-   ```bash
-    source ./checkers.sh
-    checkUser "root"
-    [ ${?} -ne 0 ] && echo "Scrip must execute with sudo privilege" && exit 1
-    groupExist "webAdmins"
-    [ ${?} -ne 0 ] && echo "webAdmins group is not exist" && exit 2
-    ```
-    #### Fetch the users of "webAdmins" group
-   ```bash
-    GROUP_MEMBERS=$(groupmems -l -g webAdmins) > members.txt
-    echo "Users in the webAdmins group: $GROUP_MEMBERS"
-    echo "$GROUP_MEMBERS" > members.txt
-
-    exit 0
-    ```
-4. **Creating a Git repository on Gogs**:
+1. **Creating a Git repository on Gogs**:
     - Create a Git repository called "Apache Web Server" in GitLab.
     - Push all files (Ansible playbook, roles, Jenkinsfile) to that repository. 
 
-5. **GitLab Integration with Jenkins**:
+2. **GitLab Integration with Jenkins**:
     #### In GitLab Instance
     - Generate Access Token called "Jenkins_GitLab_API_Access" from the account settings. 
     #### In Jenkins web console
     - Install (GitLab, GitLab API, GitLab Authentication) Plugins.
     - Add a credential of kind "GitLab API token" by using "Jenkins_GitLab_API_Access" from GitLab.
 
-6. **Detect a code commit from GitLab repo to trigger the Jenkins pipeline**:
+3. **Detect a code commit from GitLab repo to trigger the Jenkins pipeline**:
 
     #### In Jenkins web console
     - Generate API Token called "GitLab_Webhook" from "admin > Configure". 
     #### In GitLab Instance
     - Add a Webhook in the repo from the repo settings using "GitLab_Webhook" from Jenkins.
 
-7. **Jenkins Configuration**:
+4. **Jenkins Configuration**:
     #### To access the private GitLab repository
     - Add a credential of kind "Username with password" include "Jenkins_GitLab_API_Access".
 

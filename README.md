@@ -270,20 +270,10 @@ This project aims to set up a (CI/CD) pipeline using Jenkins, Ansible, and GitLa
     </html>
 
 ## Jenkins File to deploy the Ansible Playbook
-#### Run ansible playbook in the target machine (VM3) using "SSH_PRIVATE_KEY" & "SUDO_PASS" credentials
-    stage('Run Ansible Playbook') {
-        steps {
-            // Use the withCredentials block to temporarily add the SSH private key to the environment
-            withCredentials([sshUserPrivateKey(credentialsId: 'Apache_Credential', keyFileVariable: 'SSH_PRIVATE_KEY'),
-                             string(credentialsId: 'sudo_pass', variable: 'SUDO_PASS')]) {
-                // Run the ansible-playbook command
-                sh 'ansible-playbook WebServerSetup.yml --private-key=${SSH_PRIVATE_KEY} --extra-vars ${SUDO_PASS}'
-            }
-        }
-    }
+
 #### Run GroupMembers script to fetch the admin members when the failure of the pipeline and save it in "MEMS" variable
-    post {  
-        failure {
+    stages {
+        stage('Bach Script Execution') {
             script {
                 // Use the withCredentials block to temporarily add the SSH private key to the environment
                 withCredentials([sshUserPrivateKey(credentialsId: 'Apache_Credential', keyFileVariable: 'SSH_PRIVATE_KEY'),
@@ -297,7 +287,25 @@ This project aims to set up a (CI/CD) pipeline using Jenkins, Ansible, and GitLa
                                     returnStdout: true).trim() 
                     echo "Members: ${MEMS}" 
                 }
+            }
+        }
+
+#### Run ansible playbook in the target machine (VM3) using "SSH_PRIVATE_KEY" & "SUDO_PASS" credentials
+    stage('Run Ansible Playbook') {
+        steps {
+            // Use the withCredentials block to temporarily add the SSH private key to the environment
+            withCredentials([sshUserPrivateKey(credentialsId: 'Apache_Credential', keyFileVariable: 'SSH_PRIVATE_KEY'),
+                             string(credentialsId: 'sudo_pass', variable: 'SUDO_PASS')]) {
+                // Run the ansible-playbook command
+                sh 'ansible-playbook WebServerSetup.yml --private-key=${SSH_PRIVATE_KEY} --extra-vars ${SUDO_PASS}'
+            }
+        }
+    }
+
 #### Send email notification in case of pipeline failure 
+    post {  
+        failure {
+            script {               
                 // Send an email if the pipeline fails
                 emailext (
                     subject: "Pipeline Failed: ${JOB_NAME}",

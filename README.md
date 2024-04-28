@@ -160,9 +160,10 @@ This project aims to set up a (CI/CD) pipeline using Jenkins, Ansible, and GitLa
 ## Ansible Playbook to deploy Apache server
 
  ### Configure the inventory file:
+   ```ini
    [webservers]
    192.168.44.140
-
+   ```
  ### Upade the ansible configuration file:
    [defaults]
    inventory = inventory

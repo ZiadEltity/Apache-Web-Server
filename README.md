@@ -271,7 +271,7 @@ This project aims to set up a (CI/CD) pipeline using Jenkins, Ansible, and GitLa
 
 ## Jenkins File to deploy the Ansible Playbook
 
-#### Run GroupMembers script to fetch the admin members when the failure of the pipeline and save it in "MEMS" variable
+#### First stage: To run GroupMembers.sh script to fetch the admin members when the failure of the pipeline and save it in "MEMS" variable
     stages {
         stage('Bach Script Execution') {
             script {
@@ -290,7 +290,7 @@ This project aims to set up a (CI/CD) pipeline using Jenkins, Ansible, and GitLa
             }
         }
 
-#### Run ansible playbook in the target machine (VM3) using "SSH_PRIVATE_KEY" & "SUDO_PASS" credentials
+#### Second stage: To run ansible playbook in the target machine (VM3) using "SSH_PRIVATE_KEY" & "SUDO_PASS" credentials
     stage('Run Ansible Playbook') {
         steps {
             // Use the withCredentials block to temporarily add the SSH private key to the environment

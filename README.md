@@ -159,7 +159,23 @@ This project aims to set up a (CI/CD) pipeline using Jenkins, Ansible, and GitLa
    
 ## Ansible Playbook to deploy Apache server
 
-### Install the role with ansible-galaxy command:
+ ### Configure the inventory file:
+   [webservers]
+   192.168.44.140
+
+ ### Upade the ansible configuration file:
+   [defaults]
+   inventory = inventory
+   remote_user = apache
+   host_key_checking = no
+
+  [privilege_escalation]
+  become = yes
+  become_user = root
+  become_method = sudo
+  become_ask_pass = no
+
+ ### Install the role with ansible-galaxy command:
     ansible-galaxy init roles/webserver-role
  ### Ansible Playbook (WebServerSetup.yml)
     - name: Playbook to install and configure Apache HTTP Server on VM3

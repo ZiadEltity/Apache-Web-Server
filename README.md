@@ -1,5 +1,8 @@
 # Apache-Web-Server with Jenkins/Ansible
 
+![Project Flowchart](https://github.com/ZiadEltity/Apache-Web-Server-/assets/70934743/0b22336b-f70d-4d9b-bbcd-bf074b82c32d)
+
+
 ## Project Description
 
 This project aims to set up a (CI/CD) pipeline using Jenkins, Ansible, and GitLab. It involves provisioning virtual machines (VMs) with dedicated services, managing user access, integrating GitLab with Jenkins, and detecting a code commit to make the Jenkins pipeline autonomously execute an ansible playbook to install and configure Apache HTTP Server and generate an email notification if the pipeline fails.

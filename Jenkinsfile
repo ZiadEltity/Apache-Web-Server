@@ -2,20 +2,7 @@ pipeline {
     agent any
   
     stages {
-
-        stage('Run Ansible Playbook') {
-            steps {
-                // Use the withCredentials block to temporarily add the SSH private key to the environment
-                withCredentials([sshUserPrivateKey(credentialsId: 'Apache_Credential', keyFileVariable: 'SSH_PRIVATE_KEY'),
-                                 string(credentialsId: 'sudo_pass', variable: 'SUDO_PASS')]) {
-                    // Run the ansible-playbook command
-                    sh 'ansible-playbook WebServerSetup.yml --private-key=${SSH_PRIVATE_KEY} --extra-vars ${SUDO_PASS}'
-                }
-            }
-        }
-    }
-    post {  
-        failure {
+        stage('Bach Script Execution') {
             script {
                 // Use the withCredentials block to temporarily add the SSH private key to the environment
                 withCredentials([sshUserPrivateKey(credentialsId: 'Apache_Credential', keyFileVariable: 'SSH_PRIVATE_KEY'),
@@ -29,7 +16,23 @@ pipeline {
                                     returnStdout: true).trim() 
                     echo "Members: ${MEMS}" 
                 }
-                
+            }
+        }
+
+        stage('Deploy Apache Web Server - Ansible playbook') {
+            steps {
+                // Use the withCredentials block to temporarily add the SSH private key to the environment
+                withCredentials([sshUserPrivateKey(credentialsId: 'Apache_Credential', keyFileVariable: 'SSH_PRIVATE_KEY'),
+                                 string(credentialsId: 'sudo_pass', variable: 'SUDO_PASS')]) {
+                    // Run the ansible-playbook command
+                    sh 'ansible-playbook WebServerSetup.yml --private-key=${SSH_PRIVATE_KEY} --extra-vars ${SUDO_PASS}'
+                }
+            }
+        }
+    }
+    post {  
+        failure {
+            script {               
                 // Send an email if the pipeline fails
                 emailext (
                     subject: "Pipeline Failed: ${JOB_NAME}",

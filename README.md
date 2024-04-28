@@ -165,6 +165,7 @@ This project aims to set up a (CI/CD) pipeline using Jenkins, Ansible, and GitLa
    192.168.44.140
    ```
  ### Upade the ansible configuration file:
+   ```ini
    [defaults]
    inventory = inventory
    remote_user = apache
@@ -175,7 +176,7 @@ This project aims to set up a (CI/CD) pipeline using Jenkins, Ansible, and GitLa
   become_user = root
   become_method = sudo
   become_ask_pass = no
-
+  ```
  ### Install the role with ansible-galaxy command:
     ansible-galaxy init roles/webserver-role
  ### Ansible Playbook (WebServerSetup.yml)

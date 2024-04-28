@@ -273,19 +273,21 @@ This project aims to set up a (CI/CD) pipeline using Jenkins, Ansible, and GitLa
 
 #### First stage: To run GroupMembers.sh script to fetch the admin members when the failure of the pipeline and save it in "MEMS" variable
     stage('Bach Script Execution') {
-        script {
-            // Use the withCredentials block to temporarily add the SSH private key to the environment
-            withCredentials([sshUserPrivateKey(credentialsId: 'Apache_Credential', keyFileVariable: 'SSH_PRIVATE_KEY'),
-                                string(credentialsId: 'sudo_pass', variable: 'SUDO_PASS')]) {
-                // Run bash-script
-                sh '''
-                    scp -i ${SSH_PRIVATE_KEY} -r ./groupMemScript/ apache@192.168.44.140:/home/apache/Desktop/
-                    ssh -i ${SSH_PRIVATE_KEY} apache@192.168.44.140 "echo ${SUDO_PASS} | sudo -S chmod a+x /home/apache/Desktop/groupMemScript/*"
-                    '''
-                env.MEMS = sh( script: 'ssh -i ${SSH_PRIVATE_KEY} apache@192.168.44.140 "echo ${SUDO_PASS} | sudo -S /home/apache/Desktop/groupMemScript/GroupMembers.sh"',
-                                returnStdout: true).trim() 
-                echo "Members: ${MEMS}" 
-            }
+        steps {
+            script {
+                // Use the withCredentials block to temporarily add the SSH private key to the environment
+                withCredentials([sshUserPrivateKey(credentialsId: 'Apache_Credential', keyFileVariable: 'SSH_PRIVATE_KEY'),
+                                    string(credentialsId: 'sudo_pass', variable: 'SUDO_PASS')]) {
+                    // Run bash-script
+                    sh '''
+                        scp -i ${SSH_PRIVATE_KEY} -r ./groupMemScript/ apache@192.168.44.140:/home/apache/Desktop/
+                        ssh -i ${SSH_PRIVATE_KEY} apache@192.168.44.140 "echo ${SUDO_PASS} | sudo -S chmod a+x /home/apache/Desktop/groupMemScript/*"
+                        '''
+                    env.MEMS = sh( script: 'ssh -i ${SSH_PRIVATE_KEY} apache@192.168.44.140 "echo ${SUDO_PASS} | sudo -S /home/apache/Desktop/groupMemScript/GroupMembers.sh"',
+                                    returnStdout: true).trim() 
+                    echo "Members: ${MEMS}" 
+                }
+            }    
         }
     }
 

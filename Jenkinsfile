@@ -4,6 +4,7 @@ pipeline {
         stage('Bach Script Execution') {
             steps {
                 script {
+                    // Initialize the variable to avoid the error of null if the script didn't executed successfully
                     env.MEMS = "Undefined - Destination unreachable"
                     // Use the withCredentials block to temporarily add the SSH private key to the environment
                     withCredentials([sshUserPrivateKey(credentialsId: 'Apache_Credential', keyFileVariable: 'SSH_PRIVATE_KEY'),

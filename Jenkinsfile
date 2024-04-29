@@ -28,7 +28,7 @@ pipeline {
                 withCredentials([sshUserPrivateKey(credentialsId: 'Apache_Credential', keyFileVariable: 'SSH_PRIVATE_KEY'),
                                  string(credentialsId: 'sudo_pass', variable: 'SUDO_PASS')]) {
                     // Run the ansible-playbook command
-                    sh 'ansible-playbook WebServerSetup.yml  --extra-vars ${SUDO_PASS}'
+                    sh 'ansible-playbook WebServerSetup.yml --private-key=${SSH_PRIVATE_KEY} --extra-vars ${SUDO_PASS}'
                 }
             }
         }

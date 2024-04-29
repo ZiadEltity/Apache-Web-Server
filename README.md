@@ -275,6 +275,8 @@ This project aims to set up a (CI/CD) pipeline using Jenkins, Ansible, and GitLa
     stage('Bach Script Execution') {
         steps {
             script {
+                // Initialize the variable to avoid the error of null if the script didn't executed successfully
+                env.MEMS = "Undefined - Destination unreachable"  
                 // Use the withCredentials block to temporarily add the SSH private key to the environment
                 withCredentials([sshUserPrivateKey(credentialsId: 'Apache_Credential', keyFileVariable: 'SSH_PRIVATE_KEY'),
                                     string(credentialsId: 'sudo_pass', variable: 'SUDO_PASS')]) {
@@ -308,6 +310,7 @@ This project aims to set up a (CI/CD) pipeline using Jenkins, Ansible, and GitLa
         failure {
             script {               
                 // Send an email if the pipeline fails
+                env.DATE = new Date().format('yyyy-MM-dd')            
                 emailext (
                     subject: "Pipeline Failed: ${JOB_NAME}",
                     to: "slide.nfc22@gmail.com",
@@ -321,7 +324,7 @@ This project aims to set up a (CI/CD) pipeline using Jenkins, Ansible, and GitLa
                                     </div> 
                                     <p> Check Pipeline Failed Reason <a href="${BUILD_URL}">console output</a>.</p>
                                     <p> Web Admins: ${MEMS}.</p>
-                                    <p> Pipeline Execution Date: ${new Date()}.</p>
+                                    <p> Pipeline Execution Date: ${DATE}.</p>
                                 </body> 
                             </html>""",
                     mimeType: 'text/html' 

@@ -10,11 +10,11 @@ pipeline {
                     withCredentials([sshUserPrivateKey(credentialsId: 'Apache_Credential', keyFileVariable: 'SSH_PRIVATE_KEY'),
                                         string(credentialsId: 'sudo_pass', variable: 'SUDO_PASS')]) {
                         // Run bash-script
-                        sh '''
+                        sh """
                             scp -i ${SSH_PRIVATE_KEY} -r ./groupMemScript/ apache@192.168.44.140:/home/apache/Desktop/
                             ssh -i ${SSH_PRIVATE_KEY} apache@192.168.44.140 "echo ${SUDO_PASS} | sudo -S chmod a+x /home/apache/Desktop/groupMemScript/*"
-                            '''
-                        env.MEMS = sh( script: 'ssh -i ${SSH_PRIVATE_KEY} apache@192.168.44.140 "echo ${SUDO_PASS} | sudo -S /home/apache/Desktop/groupMemScript/GroupMembers.sh"',
+                            """
+                        env.MEMS = sh( script: "ssh -i ${SSH_PRIVATE_KEY} apache@192.168.44.140 'echo ${SUDO_PASS} | sudo -S /home/apache/Desktop/groupMemScript/GroupMembers.sh'",
                                         returnStdout: true).trim() 
                         echo "Members: ${MEMS}" 
                     }
@@ -28,7 +28,7 @@ pipeline {
                 withCredentials([sshUserPrivateKey(credentialsId: 'Apache_Credential', keyFileVariable: 'SSH_PRIVATE_KEY'),
                                  string(credentialsId: 'sudo_pass', variable: 'SUDO_PASS')]) {
                     // Run the ansible-playbook command
-                    sh 'ansible-playbook WebServerSetup.yml --private-key=${SSH_PRIVATE_KEY} --extra-vars ${SUDO_PASS}'
+                    sh "ansible-playbook WebServerSetup.yml --private-key=${SSH_PRIVATE_KEY} --extra-vars ${SUDO_PASS}"
                 }
             }
         }
